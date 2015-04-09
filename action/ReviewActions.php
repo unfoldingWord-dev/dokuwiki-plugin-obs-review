@@ -13,6 +13,11 @@ if(!defined('DOKU_INC')) die();
 class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin {
 
     /**
+     * @var door43Cache
+     */
+    private $cache;
+
+    /**
      * Registers a callback functions for the desired actions
      *
      * @param Doku_Event_Handler $controller DokuWiki's event controller object
@@ -48,15 +53,29 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
 
         // put the checking level badge on this page
         $status = $this->get_level_status_from_cache($parts[0]);
-        echo '<p>OBS version: ' . $status['version'] . ', Checking level: ' . $status['checking_level'] . '</p>';
 
+        // get the css class
+        if (count($parts) == 2) {
 
-//        //no other action handlers needed
-//        $event->stopPropagation();
-//        $event->preventDefault();
-//
-//
-//        $this->override_html_register();
+            // on this page we need to leave room for the table of contents
+            $cssClass = 'obs-checking-level toc';
+        }
+        else {
+
+            // on this page we have the fill width
+            $cssClass = 'obs-checking-level';
+        }
+
+        if (empty($status)) {
+            $text = $this->getLang('noCheckingLevelSummary');
+        }
+        else {
+            $url = '<a href="https://unfoldingword.org/stories/">https://unfoldingword.org/stories</a>';
+            $text = sprintf($this->getLang('checkingLevelSummary'), $status['checking_level'], $status['version'], $url);
+        }
+
+        echo '<div class="' . $cssClass . '"><p style="font-size: 0.875em; color: #666;">' . $text . '</p></div>';
+
     }
 
     /**
@@ -66,33 +85,18 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
      */
     private function get_level_status_from_cache($langCode) {
 
-        global $conf;
-
-        $levels = null;
-
-        // make sure the cache directory exists
-        $cacheDir = $conf['cachedir'] . DIRECTORY_SEPARATOR . 'obs_review_cache';
-        if (!is_dir($cacheDir)) mkdir($cacheDir, 0755, true);
-
-        // check for a cached version, max age = 1 hour
-        $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . 'obs-catalog.json';
-        if (!is_file($cacheFile)) {
-            if (filectime($cacheFile) < strtotime('-1 hour')) {
-                unlink($cacheFile);
-            }
-            else {
-                $levels = json_decode(file_get_contents($cacheFile), true);
-            }
-        }
+        /* @var $cache door43Cache */
+        $cache = $this->getCache();
+        $cacheFile = 'obs-catalog.json';
+        $levels = $cache->getObject($cacheFile, true);
 
         // download from api.unfoldingWord.org if needed
         if (empty($levels)) {
 
             $http = new DokuHTTPClient();
             $raw = $http->get('https://api.unfoldingword.org/obs/txt/1/obs-catalog.json');
-            file_put_contents($cacheFile, $raw);
-
             $levels = json_decode($raw, true);
+            $cache->saveString($cacheFile, $raw);
         }
 
         // return null if there are still no levels
@@ -106,5 +110,17 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
         }
 
         return null;
+    }
+
+    private function getCache() {
+
+        if (empty($this->cache)) {
+
+            /* @var $common helper_plugin_door43common */
+            $common = plugin_load('helper','door43common');
+            $this->cache = $common->getCache();
+        }
+
+        return $this->cache;
     }
 }

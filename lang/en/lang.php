@@ -11,9 +11,10 @@
 // $lang['menu'] = 'Your menu entry';
 
 // custom language strings for the plugin
-//$lang['translateTitle'] = 'Translate';
+$lang['checkingLevelSummary'] = 'This resource is published on unfoldingWord as Checking Level&nbsp;%1$s and version&nbsp;%2$s. See it at %3$s.';
+$lang['noCheckingLevelSummary'] = 'No Checking Level information found.';
 
 // localized strings for JavaScript
-// js example: var text = LANG.plugins['door43register']['translate'];
+// js example: var text = LANG.plugins['door43obsreview']['translate'];
 //$lang['js']['translate'] = 'Translate';
 
