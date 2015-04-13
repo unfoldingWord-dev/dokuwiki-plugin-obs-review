@@ -58,12 +58,12 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
         if (count($parts) == 2) {
 
             // on this page we need to leave room for the table of contents
-            $cssClass = 'obs-checking-level toc';
+            $cssClass = 'obs-checking toc';
         }
         else {
 
             // on this page we have the fill width
-            $cssClass = 'obs-checking-level';
+            $cssClass = 'obs-checking';
         }
 
         if (empty($status)) {
@@ -72,6 +72,7 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
         else {
             $url = '<a href="https://unfoldingword.org/stories/">https://unfoldingword.org/stories</a>';
             $text = sprintf($this->getLang('checkingLevelSummary'), $status['checking_level'], $status['version'], $url);
+            $cssClass .= ' obs-checked level-' . $status['checking_level'];
         }
 
         echo '<div class="' . $cssClass . '"><p style="font-size: 0.875em; color: #666;">' . $text . '</p></div>';
