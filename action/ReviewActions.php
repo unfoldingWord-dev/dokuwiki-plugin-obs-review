@@ -117,9 +117,14 @@ class action_plugin_door43obsreview_ReviewActions extends DokuWiki_Action_Plugin
 
         if (empty($this->cache)) {
 
-            /* @var $common helper_plugin_door43common */
-            $common = plugin_load('helper','door43common');
-            $this->cache = $common->getCache();
+            /* @var $door43shared helper_plugin_door43shared */
+            global $door43shared;
+
+            if (empty($door43shared)) {
+                $door43shared = plugin_load('helper', 'door43shared');
+            }
+
+            $this->cache = $door43shared->getCache();
         }
 
         return $this->cache;
